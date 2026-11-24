@@ -1,4 +1,11 @@
 import csv
+import re
+
+
+def spreadsheet_text(value):
+    if isinstance(value, str) and re.match(r"^[\t\r\n]|^[\s\ufeff]*[=+\-@＝＋－＠]", value):
+        return "'" + value
+    return value
 
 # 讀取原始資料並儲存到字典中
 original_data = {}
@@ -19,7 +26,7 @@ with open('output.csv', 'w', newline='', encoding='utf-8') as f:
     fieldnames.append('核對結果')
     writer = csv.DictWriter(f, fieldnames=fieldnames)
 
-    writer.writeheader()
+    writer.writerow({key: spreadsheet_text(key) for key in fieldnames})
     for row in input_data:
         if row['#id'] in original_data:
             if row['name'] == original_data[row['#id']]:
@@ -28,4 +35,4 @@ with open('output.csv', 'w', newline='', encoding='utf-8') as f:
                 row['核對結果'] = original_data[row['#id']]
         else:
             row['核對結果'] = '統編不存在'
-        writer.writerow(row)
+        writer.writerow({key: spreadsheet_text(value) for key, value in row.items()})
